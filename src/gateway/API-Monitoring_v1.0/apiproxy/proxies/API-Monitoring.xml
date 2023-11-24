@@ -1,0 +1,730 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<ProxyEndpoint name="API-MonitoringProxyEndpoint">
+   <Description>API Monitoring</Description>
+   <FaultRules>
+      <FaultRule name="SecurityFaultHandling">
+         <Step>
+            <Name>SF-SecurityFaultCallout</Name>
+         </Step>
+         <Condition>((oauthV2.VerifyAccessToken.failed equals true) or ((oauthV2.VerifyAPIKey.failed equals true) or (BasicAuthentication.DecodeBasicAuthentication.failed equals true) or (acl.AccessControl.failed equals true) or (oauthV2.failed equals true) or (authFlag equals false) or (isValidToken equals false)))</Condition>
+      </FaultRule>
+      <FaultRule name="ThreatFaultHandling">
+         <Step>
+            <Name>SF-ThreatFault</Name>
+         </Step>
+         <Condition>((jsonattack.cf-JSONThreatProtection.DoSAEvaluation.failed equals true) or (threatProtectionEvaluationStatus == "failed"))</Condition>
+      </FaultRule>
+   </FaultRules>
+   <DefaultFaultRule name="All">
+      <AlwaysEnforce>true</AlwaysEnforce>
+      <Step>
+         <Name>SF-DefaultFaultCallout</Name>
+      </Step>
+      <AlwaysEnforce>true</AlwaysEnforce>
+   </DefaultFaultRule>
+   <PreFlow name="PreFlow">
+      <Request>
+         <Step>
+            <Name>cf-set-log-variables</Name>
+         </Step>
+         <Step>
+            <Condition>(log.proxyVerb != "OPTIONS")</Condition>
+            <Name>cf-Generate-Message-Correlation-ID</Name>
+         </Step>
+         <Step>
+            <Name>SF-Proxy-Current-Flow-Name</Name>
+         </Step>
+         <Step>
+            <Name>SF-Log-Preflow-Request</Name>
+         </Step>
+         <Step>
+            <Condition>(request.header.Authorization equals null) and (log.proxyVerb != "OPTIONS")</Condition>
+            <Name>cf-data-validation-Authorization</Name>
+         </Step>
+         <Step>
+            <Condition>(log.proxyVerb != "OPTIONS") and (request.header.Content-Length != 0)</Condition>
+            <Name>SF-JSONThreatValidation</Name>
+         </Step>
+         <Step>
+            <Condition>(log.proxyVerb != "OPTIONS")</Condition>
+            <Name>SF-ThreatProtection</Name>
+         </Step>
+         <Step>
+            <Condition>(log.proxyVerb != "OPTIONS")</Condition>
+            <Name>SF-Validate-Access-Token</Name>
+         </Step>
+      </Request>
+      <Response>
+      </Response>
+   </PreFlow>
+   <Flows>
+      <Flow name="WrongAccept">
+         <Description/>
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Name>cf-Fault-Unsupported-AcceptType</Name>
+            </Step>
+         </Request>
+         <Response/>
+         <Condition>(log.proxyVerb != "OPTIONS") and (!(log.Accept JavaRegex "(text\/xml)(;.*)|(.*;)(text\/xml)(;.*)|text\/xml|(.*;)(text\/xml)|(application\/xml)(;.*)|(.*;)(application\/xml)(;.*)|application\/xml|(.*;)(application\/xml)|(application\/json)(;.*)|(.*;)(application\/json)(;.*)|application\/json|(.*;)(application\/json)"))</Condition>
+      </Flow>
+      <Flow name="WrongContentType">
+         <Description/>
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Name>cf-Fault-Unsupported-ContentType</Name>
+            </Step>
+         </Request>
+         <Response/>
+         <Condition>(log.proxyVerb != "OPTIONS") and ((!(request.content = "")) and (!(request.content is null)) and !(log.Content-Type JavaRegex "(text\/xml)(;.*)|(.*;)(text\/xml)(;.*)|text\/xml|(.*;)(text\/xml)|(application\/xml)(;.*)|(.*;)(application\/xml)(;.*)|application\/xml|(.*;)(application\/xml)|(application\/json)(;.*)|(.*;)(application\/json)(;.*)|application\/json|(.*;)(application\/json)"))</Condition>
+      </Flow>
+      <Flow name="getCollections">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getCollections</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="createCollection">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-createCollection</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="getAllVariables">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getAllVariables</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/variables&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="createVariables">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-createVariables</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/variables&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="getVariablesOverview">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getVariablesOverview</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/variables/overview&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="searchForEnvironment">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-searchForEnvironment</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/variables/search&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="searchForCertificates">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-searchForCertificates</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/certificates/search&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="getCertificates">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getCertificates</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/certificates&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="createOrUpdateCertificate">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-createOrUpdateCertificate</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/certificates&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="getCertificatesOverView">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getCertificatesOverView</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/certificates/overview&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="search">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-search</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/search&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="getMetaData">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getMetaData</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/metadata&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="createMetaData">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-createMetaData</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/metadata&quot;) and (request.verb= &quot;PUT&quot;)</Condition>
+      </Flow>
+      <Flow name="getSlackChannelsWithMonitoringScope">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getSlackChannelsWithMonitoringScope</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/slackChannels&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="getCertificate">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getCertificate</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/certificates/{name}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="deleteCertificate">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-deleteCertificate</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/certificates/{name}&quot;) and (request.verb= &quot;DELETE&quot;)</Condition>
+      </Flow>
+      <Flow name="downloadCertificate">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-downloadCertificate</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/certificates/{name}/download&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="getRequestStatLogs">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getRequestStatLogs</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/requests/{requestId}/events/{eventId}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="getRequestStats">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getRequestStats</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/requests/{requestId}/schedulers/{schedulerId}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="getCollection">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getCollection</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="updateCollection">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-updateCollection</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}&quot;) and (request.verb= &quot;PUT&quot;)</Condition>
+      </Flow>
+      <Flow name="deleteCollection">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-deleteCollection</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}&quot;) and (request.verb= &quot;DELETE&quot;)</Condition>
+      </Flow>
+      <Flow name="getRequests">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getRequests</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/requests&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="createRequest">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-createRequest</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/requests&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="getRequest">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getRequest</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/requests/{requestId}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="updateRequest">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-updateRequest</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/requests/{requestId}&quot;) and (request.verb= &quot;PUT&quot;)</Condition>
+      </Flow>
+      <Flow name="deleteRequest">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-deleteRequest</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/requests/{requestId}&quot;) and (request.verb= &quot;DELETE&quot;)</Condition>
+      </Flow>
+      <Flow name="getSchedulers">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getSchedulers</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/schedulers&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="getRequestSequence">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getRequestSequence</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/sequence&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="updateRequestSequence">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-updateRequestSequence</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/sequence&quot;) and (request.verb= &quot;PUT&quot;)</Condition>
+      </Flow>
+      <Flow name="getCollectionsVariable">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getCollectionsVariable</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/collections/{id}/variables&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="getVariables">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-getVariables</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/variables/{id}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="updateVariables">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-updateVariables</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/variables/{id}&quot;) and (request.verb= &quot;PUT&quot;)</Condition>
+      </Flow>
+      <Flow name="deleteVariables">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-deleteVariables</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/variables/{id}&quot;) and (request.verb= &quot;DELETE&quot;)</Condition>
+      </Flow>
+      <!-- CORS Preflight flow-->
+      <Flow name="CORS">
+         <Description/>
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Name>cf-getCORSDomainList</Name>
+            </Step>
+         </Request>
+         <Response>
+            <Step>
+               <Name>cf-CORSValidation</Name>
+            </Step>
+         </Response>
+         <Condition>(log.proxyVerb == "OPTIONS") and (log.origin != null)</Condition>
+      </Flow>
+      <Flow name="unknown-resource">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Name>cf-Unknown-Resource</Name>
+            </Step>
+         </Request>
+         <Response/>
+      </Flow>
+   </Flows>
+   <PostFlow name="PostFlow">
+      <Request></Request>
+      <Response>
+         <Step>
+		      <Condition>(request.verb != "OPTIONS")</Condition>
+            <Name>cf-getCORSDomainList</Name>
+         </Step>
+         <Step>
+			   <Condition>(request.verb != "OPTIONS")</Condition>
+            <Name>cf-CORSValidation</Name>
+         </Step>
+         <Step>
+            <Name>SF-Log-Collector</Name>
+         </Step>
+         <Step>
+            <Name>cf-Custom-Statistics-Collector</Name>
+         </Step>
+      </Response>
+   </PostFlow>
+   <PostClientFlow>
+        <Request/>
+        <Response>
+        </Response>
+    </PostClientFlow>
+   <HTTPProxyConnection>
+      <BasePath>/itorix/v1/monitor</BasePath>
+      <VirtualHost>tonikvirtualhosthttps</VirtualHost>
+   </HTTPProxyConnection>
+   <RouteRule name="NoRoute">
+        <Condition>(request.verb == "OPTIONS")</Condition>
+   </RouteRule>
+   <RouteRule name="API-Monitoring">
+      <Condition>(target.route.service = &quot;API-Monitoring&quot;)</Condition>
+      <TargetEndpoint>API-Monitoring</TargetEndpoint>
+   </RouteRule>
+</ProxyEndpoint>

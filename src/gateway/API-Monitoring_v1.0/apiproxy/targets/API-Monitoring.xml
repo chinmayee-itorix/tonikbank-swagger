@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TargetEndpoint name="API-Monitoring">
+    <Description>API Monitoring</Description>
+	<FaultRules>
+	</FaultRules>
+	<DefaultFaultRule>
+            <Step>
+                <Name>SF-PostflowResponseTargetLogAggregator</Name>
+            </Step>
+    	<AlwaysEnforce>true</AlwaysEnforce>
+	</DefaultFaultRule>
+	<PreFlow name="PreFlow">
+        <Request>
+            <Step>
+                <Name>SF-PreflowRequestTargetLogAggregator</Name>
+            </Step>
+            <Step>
+                <Name>cf-Remove-Proxy-Auth-Header</Name>
+            </Step>
+        </Request>
+        <Response/>
+    </PreFlow>
+	<Flows>
+        <Flow name="getCollections">
+        	<Condition>(targetOperation = &quot;getCollections&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="createCollection">
+        	<Condition>(targetOperation = &quot;createCollection&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getAllVariables">
+        	<Condition>(targetOperation = &quot;getAllVariables&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="createVariables">
+        	<Condition>(targetOperation = &quot;createVariables&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getVariablesOverview">
+        	<Condition>(targetOperation = &quot;getVariablesOverview&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="searchForEnvironment">
+        	<Condition>(targetOperation = &quot;searchForEnvironment&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="searchForCertificates">
+        	<Condition>(targetOperation = &quot;searchForCertificates&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getCertificates">
+        	<Condition>(targetOperation = &quot;getCertificates&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="createOrUpdateCertificate">
+        	<Condition>(targetOperation = &quot;createOrUpdateCertificate&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getCertificatesOverView">
+        	<Condition>(targetOperation = &quot;getCertificatesOverView&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="search">
+        	<Condition>(targetOperation = &quot;search&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getMetaData">
+        	<Condition>(targetOperation = &quot;getMetaData&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="createMetaData">
+        	<Condition>(targetOperation = &quot;createMetaData&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getSlackChannelsWithMonitoringScope">
+        	<Condition>(targetOperation = &quot;getSlackChannelsWithMonitoringScope&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getCertificate">
+        	<Condition>(targetOperation = &quot;getCertificate&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="deleteCertificate">
+        	<Condition>(targetOperation = &quot;deleteCertificate&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="downloadCertificate">
+        	<Condition>(targetOperation = &quot;downloadCertificate&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getRequestStatLogs">
+        	<Condition>(targetOperation = &quot;getRequestStatLogs&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getRequestStats">
+        	<Condition>(targetOperation = &quot;getRequestStats&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getCollection">
+        	<Condition>(targetOperation = &quot;getCollection&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="updateCollection">
+        	<Condition>(targetOperation = &quot;updateCollection&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="deleteCollection">
+        	<Condition>(targetOperation = &quot;deleteCollection&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getRequests">
+        	<Condition>(targetOperation = &quot;getRequests&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="createRequest">
+        	<Condition>(targetOperation = &quot;createRequest&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getRequest">
+        	<Condition>(targetOperation = &quot;getRequest&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="updateRequest">
+        	<Condition>(targetOperation = &quot;updateRequest&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="deleteRequest">
+        	<Condition>(targetOperation = &quot;deleteRequest&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getSchedulers">
+        	<Condition>(targetOperation = &quot;getSchedulers&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getRequestSequence">
+        	<Condition>(targetOperation = &quot;getRequestSequence&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="updateRequestSequence">
+        	<Condition>(targetOperation = &quot;updateRequestSequence&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getCollectionsVariable">
+        	<Condition>(targetOperation = &quot;getCollectionsVariable&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="getVariables">
+        	<Condition>(targetOperation = &quot;getVariables&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="updateVariables">
+        	<Condition>(targetOperation = &quot;updateVariables&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="deleteVariables">
+        	<Condition>(targetOperation = &quot;deleteVariables&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+	</Flows>
+    <PostFlow name="PostFlow">
+        <Request>
+            <Step>
+                <Name>SF-PostflowRequestTargetLogAggregator</Name>
+            </Step>
+        </Request>
+        <Response>
+            <Step>
+                <Name>SF-PostflowResponseTargetLogAggregator</Name>
+            </Step>
+        </Response>
+    </PostFlow>
+    <HTTPTargetConnection>
+    	<LoadBalancer>
+            <Server name="Tonik-API-Monitoring">
+                <IsEnabled>true</IsEnabled>
+            </Server>
+        </LoadBalancer>
+        <Path>{targetBasePath}</Path>
+    </HTTPTargetConnection>
+</TargetEndpoint>
